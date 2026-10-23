@@ -1,6 +1,6 @@
 {
   "name": "@fegnze/dsh-assistant-plugin-dev",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Portable DSH plugin development assistant with native OpenSpec and baseline-bound delivery tools",
   "license": "MIT",
   "author": "fegnze",
