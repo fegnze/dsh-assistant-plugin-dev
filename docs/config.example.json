@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "workspace": "/absolute/path/to/workspace",
+  "githubOwner": "YOUR_GITHUB_ACCOUNT",
+  "npmAccount": "YOUR_NPM_SCOPE",
+  "registry": "https://registry.npmjs.org/",
+  "branch": "main",
+  "workflow": "publish.yml",
+  "projects": {},
+  "executables": {}
+}

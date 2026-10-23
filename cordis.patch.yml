@@ -1,0 +1,4 @@
+- insert:
+    - id: dsh-assistant-plugin-dev
+      name: '@fegnze/dsh-assistant-plugin-dev'
+      config: {}

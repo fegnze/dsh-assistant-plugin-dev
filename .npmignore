@@ -1,0 +1,10 @@
+**/__pycache__/
+**/*.py[cod]
+**/.state/
+**/.env
+**/.env.*
+**/config.json
+**/config.local.*
+node_modules/
+*.tgz
+.DS_Store

@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.state/
+.env*
+config.json
+config.local.*

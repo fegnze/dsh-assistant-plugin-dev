@@ -1,0 +1,32 @@
+name: dsh-devkit
+version: 1
+description: DSH 插件原生 spec-driven 变更，复用 devkit CLI 完成开发与交付
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: 本次问题、能力变化、范围与验收条件
+    template: proposal.md
+    instruction: 按原生 OPSX 编写提案；按需查询 guide 规范与 inspect 事实。列出新建或修改的 Capabilities，使用主 specs 中的准确能力路径。写清交付范围和验收条件；范围包含首次公开交付时列全建仓、提交推送和发布核验；安装与绑定不授权发布。没有规范级行为变化时在 metadata 设置 skip_specs，不伪造 delta。
+    requires: []
+  - id: specs
+    generates: "specs/**/*.md"
+    description: 本次能力变化的标准 delta specs
+    template: spec.md
+    instruction: 按 proposal 的 Capabilities 为每个能力创建 specs/<capability-path>/spec.md。先读取主 specs；已有能力沿用准确路径。使用 ADDED/MODIFIED/REMOVED/RENAMED Requirements；MODIFIED 必须保留完整 requirement 与全部 scenarios。ADDED/MODIFIED 规范使用 SHALL/MUST，每个 requirement 至少一个四级 Scenario，使用 WHEN/THEN；REMOVED 保留要求名及 Reason/Migration，RENAMED 使用 FROM/TO，不要求伪造场景。新能力添加说明用途的 Purpose，已有能力 delta 不添加 Purpose。skip_specs 时不生成任何 specs 文件；需求变化则移除标记再编写真实 delta。规范描述可验证行为，不写实现步骤。
+    requires: [proposal]
+  - id: design
+    generates: design.md
+    description: 适用的技术选择、风险与迁移设计
+    template: design.md
+    instruction: 跨模块、依赖或数据模型变化、安全性能迁移复杂度或待决方案适用时编写设计。说明 Context、Goals/Non-Goals、Decisions（含替代方案）、Risks/Trade-offs 与适用 Migration Plan。动机引用 proposal，行为引用 specs，不重复正文。不适用时不造空设计；原生没有 skip_design，缺少设计仍显示未完成，不宣称已跳过。
+    requires: [proposal]
+  - id: tasks
+    generates: tasks.md
+    description: 基于规范与设计的实施、验证与适用交付任务
+    template: tasks.md
+    instruction: 按 proposal/specs 和适用 design 生成可核验任务，先解决影响范围的设计疑问。使用编号分组和 - [ ] 复选框。按明确提案范围选择版本、精确提交、源码同步及发布核验任务；完整公开交付包含建仓与 OIDC 实发及 registry 包核验，但安装、选择助理或模板本身不授予权限。checkpoint 不单独升版，首次公开和人工认证需明确确认，发布失败不自动重复派发。
+    requires: [specs, design]
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: 读取原生 contextFiles 中的 proposal、delta specs、适用设计与任务后实施，逐项核验并更新任务。使用 operationGuidance 中的 devkit 命令与授权边界，不把 artifact 就绪或文档勾选当作实际验证。规范同步与归档由原生 OPSX 完成，不另建流程控制器。

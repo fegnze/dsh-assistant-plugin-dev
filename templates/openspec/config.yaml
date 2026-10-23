@@ -1,0 +1,29 @@
+schema: dsh-devkit
+context: |
+  由原生 OPSX 控制提案、实施和归档；devkit 提供工具、规范、验收和完整提案任务，不建立第二套流程或归档包装。
+  下文 devkit 命令是助理包 CLI 参数；使用 guide 返回的包内 CLI 路径与已配置 Python，并显式传入外置 --config 和 --state-dir。
+  OpenSpec 根为 devkit 配置的工作空间，与会话 GUI 共用。PROJECT 指目标插件，不是 OpenSpec 根；从变更 metadata 的 affected_areas 和提案确定目标。
+  使用 guide 查询开发、授权与发布规范，inspect 获取工程事实；按需复用有效上下文，不固定 guide/inspect 或其他工具的执行顺序。
+  沿用官方 proposal/specs/design/tasks DAG；行为变化通过原生 specs artifact 编写 delta，使 status/apply/sync 发现同一组具体文件。简单修复可用简短 proposal/tasks，重大方案才写真实 design；原生没有 skip_design，缺少 design 不代表已跳过。
+  无规范变化时可在该变更 .openspec.yaml 明确 skip_specs: true；有 delta 则不能使用此标记，也不生成伪规范。
+  归档后的后续修改新建小提案，不重开归档；按新范围选择任务，不默认重复首次交付。
+rules:
+  proposal:
+    - 明确本次目标是本地修复、源码同步还是发布；仅按批准范围列入独立仓库建立与核验、提交推送、npm 发布与核验，不由模板授予公开或发布权限。
+    - 按需用 remote、registry、npm-bootstrap-plan 核实真实身份、包归属与授权需求，不以 manifest 声明代替结果。
+  tasks:
+    - 列全提案范围内的任务及验收条件，删去不适用占位；不得因暂未授权裁剪首次交付待办，任务勾选代表实际完成。
+    - 使用现有 devkit validate、commit-plan/commit；适用时使用 create-repo、sync-plan/sync、npm-bootstrap-plan/npm-bootstrap、release/release-resume，不另建顺序编排。
+operations:
+  apply:
+    guidance:
+      - 复核提案范围及有效工程事实；身份、配置或范围变化时重查，插件 API 读取当前 DSH Inspect 契约。
+      - 使用 devkit 工具完成确定性操作，提交使用 commit-plan / commit，不直接 git commit 插件或以裸 npm publish 替代发布工具。源码编辑仍由 Agent 完成。
+      - 测试使用 validate {{project}} --allow-project-scripts；Host/UI 验收单独说明。代码变化后重跑受影响检查，不复用过期结果。
+      - 允许阶段性提交，不要求发布或全部任务完成才能 commit；范围变更先修订 proposal/tasks，无歧义的日常步骤不逐项审批。
+  archive:
+    guidance:
+      - 使用原生 OPSX 归档，不经 devkit 包装；归档不等于真实交付验收通过。
+      - 按提案范围核实仓库、远端提交和导出树、npm 精确版本与包字节；未获授权的公开或发布报告待确认，不勾成完成或静默缩小范围。
+      - 无需粘贴日志、凭证、SHA 清单；报告事实和未覆盖项。待办未完成不能作为完成归档，取消或延期应如实保留。
+      - 归档后的后续修改新建小提案，不重开归档，按新范围选择验收与交付任务。
