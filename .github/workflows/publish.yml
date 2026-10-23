@@ -1,0 +1,66 @@
+name: Publish npm
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Reviewed commit SHA
+        required: true
+        type: string
+      dry_run:
+        description: Validate without publishing
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Verify reviewed commit
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: test "$GITHUB_SHA" = "$EXPECTED_SHA"
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - run: npm install --global npm@11.21.1 --ignore-scripts
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm test
+      - run: for f in src/*.js src/*.mjs; do [ -f "$f" ] || continue; node --check "$f"; done
+      - uses: actions/setup-python@v5
+        id: python
+        with:
+          python-version: '3.12'
+      - name: Install Python test requirements
+        env:
+          DSH_ASSISTANT_PYTHON: ${{ steps.python.outputs.python-path }}
+        run: '"$DSH_ASSISTANT_PYTHON" -m pip install --disable-pip-version-check -r requirements.txt'
+      - name: Install verified native OpenSpec CLI
+        run: |
+          npm install --global @fission-ai/openspec@1.8.0 --ignore-scripts
+          test "$(openspec --version)" = '1.8.0'
+      - name: Test Python and native CLI integration
+        env:
+          DSH_ASSISTANT_PYTHON: ${{ steps.python.outputs.python-path }}
+          OPENSPEC_TELEMETRY: '0'
+        run: |
+          export DSH_TEST_NPM_ROOT="$(node -e 'const fs=require("node:fs"),path=require("node:path"); console.log(path.dirname(path.dirname(fs.realpathSync(process.argv[1]))))' "$(command -v npm)")"
+          test -f "$DSH_TEST_NPM_ROOT/bin/npm-cli.js"
+          test -d "$DSH_TEST_NPM_ROOT/node_modules/@npmcli/package-json"
+          npm run test:python
+      - name: Check package payload
+        run: npm pack --dry-run --ignore-scripts
+      - name: Publish with OIDC provenance
+        if: inputs.dry_run == false
+        run: npm publish --access public --provenance --ignore-scripts
