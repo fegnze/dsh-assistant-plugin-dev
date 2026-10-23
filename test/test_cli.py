@@ -151,9 +151,13 @@ class CliTest(unittest.TestCase):
 
     def test_release_resume_uses_external_state(self):
         sha = 'a' * 40
-        with patch('publication.resume', return_value={'status': 'in_progress'}) as resume:
+        # This routing/state fixture must not consult a developer's GitHub login.
+        with patch('readiness.require', autospec=True) as require, \
+                patch('publication.resume', return_value={'status': 'in_progress'}) as resume:
             self.assertEqual(self.command('release-resume', 'dsh-example', '7', sha),
                              {'status': 'in_progress'})
+        require.assert_called_once_with('release-resume')
+        resume.assert_called_once()
         state = Path(resume.call_args.args[4]).resolve()
         self.assertTrue(state.is_relative_to(self.state))
         self.assertFalse(state.is_relative_to(PACKAGE))
